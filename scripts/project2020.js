@@ -111,6 +111,18 @@ var createOrderControlBlock = function (index) {
 	// add control to control as its child
 	control.appendChild(button);
 
+
+	// AJOUT D'EVENEMENT SUR INPUT
+	// changement de l'opacité du bouton d'achat selon la valeur de l'input
+	input.addEventListener("change", function() {
+		if(input.value == 0) {
+			button.style.opacity = "0.25";
+		}
+		else {
+			button.style.opacity = "0.8";
+		}
+	});
+
 	// AJOUT D'EVENEMENT SUR INPUT
 	// gestion de la quantité maximum et minimum autorisé pour un produit
 	// via une mise à jour automatique de la valeur
@@ -134,13 +146,6 @@ var createOrderControlBlock = function (index) {
 		*/
 		else if(input.value.length >= 2) {
 			input.value = input.value.substring(input.value.length - 1);
-		}
-
-		if(input.value == 0) {
-			button.style.opacity = "0.25";
-		}
-		else {
-			button.style.opacity = "0.8";
 		}
 	});
 
@@ -200,10 +205,7 @@ var search = function() {
 	}
 }
 
-var checkInput = function() {
-
-}
-
-var addProductToCard = function() {
-	console.log("lol");
+var addProductToCard = function(e) {
+	var lol = event.target;
+	console.log(lol);
 }
