@@ -16,9 +16,8 @@ var total = 0;
 // function called when page is loaded, it performs initializations
 var init = function () {
 	createShop();
+	//ajout de l'event de recherche sur le filtre
 	document.getElementById("filter").addEventListener("keyup", search);
-
-	// TODO : add other initializations to achieve if you think it is required
 }
 window.addEventListener("load", init);
 
@@ -145,13 +144,26 @@ var createOrderControlBlock = function (index) {
 		changeOpacity(input, button);
 	});
 
+	// EVENEMENT SUR L'AJOUT D'UN ELEMENT AU PANIER
 	button.addEventListener("click", function() {
+		// l'on vérifie que sa valeur est bien supérieur à 0
+		// sinon cela n'aurait pas de sens de l'ajouté au panier
 		if(input.value > 0) {
-			addProductToCard(index);
+			// vérification de l'existence de l'élément dans le panier
+			var exist = document.getElementById(index +"-achat");
+			if(exist == null) {
+				// s'il n'existe pas, le créer
+				createProductCard(index);
+			}
+			else {
+				// sinon, ajoute la valeur courant de l'input
+				// à la valeur présente dans le panier
+				addProductCard(index, input);
+			}
 		}
+		// passe la valeur de l'input à 0 et met à jour l'opacité du button
 		input.value = 0;
 		changeOpacity(input, button);
-
 	});
 
 	// the built control div node is returned
@@ -175,15 +187,36 @@ var createFigureBlock = function (image, name) {
 	return figure;
 }
 
-
+/*
+* creer et retourne une div comportant un button poubelle
+* qui permettra la suppression future de l'élément du panier si nécéssaire
+* @param divClass = classe de la div contenant le bouton
+* @param buttonClass = classe du bouton, qui est un élément enfant de la div
+* @param index = identifiant de l'élément principale de la div,
+* 							 permet de savoir quel élément devra être supprimé
+*/
 var createTrashBlock = function (divClass, buttonClass, index) {
+
+	// création de la div
 	var div = document.createElement("div");
 	div.className = divClass;
+
+	// création du button
 	var button = document.createElement("button");
 	button.className = buttonClass;
 	button.id = index + "-remove";
 
+	// ajoute le button à la div
 	div.appendChild(button);
+
+	// ajout de l'évenement de suppression sur le bouton
+	button.addEventListener("click", function() {
+		// récupère l'element du panier correspondant à l'index
+		var element = document.getElementById(index + "-achat");
+		// le supprime et met à jour la valeur du panier
+		element.parentNode.removeChild(element);
+		updateTotal();
+	})
 	return div;
 }
 
@@ -219,6 +252,13 @@ var search = function() {
 	}
 }
 
+/*
+* change l'opacité du bouton en fonction de la valeur de l'input
+* si la valeur est nul le bouton devient grisé
+* sinon le bouton devient "normal"
+* @param input = valeur déterminant le changement de l'opacité du bouton
+* @param button = bouton dont l'opacité est mis à jour
+*/
 function changeOpacity(input, button) {
 	if(input.value == 0) {
 		button.style.opacity = "0.25";
@@ -228,14 +268,25 @@ function changeOpacity(input, button) {
 	}
 }
 
-var addProductToCard = function(index, e) {
+/*
+* créer une nouvelle div dans le panier
+* correspondant à l'objet indiqué via l'index
+* @param index = identifiant de l'élement à ajouter au panier
+*/
+var createProductCard = function(index) {
 
+	// récupère la liste des élements dans le panier (achats)
 	var achats = document.querySelector(".achats");
+	// récupère le produit devant être ajouter au panier via son index
 	var product = document.getElementById(index + "-product");
 
+	// créer la nouvelle div principale de l'élement à ajouter au panier
 	var achat = document.createElement("div");
 	achat.className = 'achat';
 	achat.id = index + "-achat";
+
+	// ajoute la div principale à la liste des achats
+	achats.appendChild(achat);
 
 	// création de l'image
 	achat.appendChild(createFigureBlock(
@@ -258,17 +309,45 @@ var addProductToCard = function(index, e) {
 
 	// création de la poubelle
 	achat.appendChild(createTrashBlock("controle", "retirer", index));
-	achats.appendChild(achat);
+
+	// update du prix total
 	updateTotal();
 }
 
+/*
+* ajoute la quantité de l'input d'un produit donné au panier
+* dans ce cas, le produit existe déjà dans le panier
+* correspondant à l'objet indiqué via l'index
+* @param index = identifiant de l'élement qui est ajouté
+ 								 et sera mis à jour dans le panier
+* @param input = quantité de l'élement qui devra être ajouté au panier
+*/
+var addProductCard = function(index, input) {
+	var achat = document.getElementById(index + "-achat");
+	var addQte = Number(input.value);
+	var initQte = Number(achat.querySelector(".quantite").innerHTML);
+
+	var sum = addQte + initQte;
+	if (sum > MAX_QTY) {
+		sum = MAX_QTY;
+	}
+	achat.querySelector(".quantite").innerHTML = sum;
+	updateTotal();
+}
+
+/*
+* fait une mise à jour du prix total du panier
+*/
 var updateTotal = function() {
 	var total = 0;
+	// recupère la liste des élements du panier
 	var listProduct = document.querySelectorAll(".achat");
+	// pour chaque élément, ajoute son prix * quantité au total
 	for(var product of listProduct) {
 		var prix = product.querySelector(".prix").innerHTML;
 		var quantite = product.querySelector(".quantite").innerHTML;
 		total += prix * quantite;
 	}
+	// la valeur de #montant devient alors le total
 	document.querySelector('#montant').innerHTML = total;
 }
