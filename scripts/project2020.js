@@ -18,6 +18,23 @@ var init = function () {
 	createShop();
 	//ajout de l'event de recherche sur le filtre
 	document.getElementById("filter").addEventListener("keyup", search);
+
+	createLocalStorageSaveButton();
+	createLocalStorageDeleteButton();
+
+	if(localStorage.length != 0) {
+		var achats = document.querySelector(".achats");
+		for(var i = 0; i < localStorage.length; i++) {
+
+			var product = localStorage.getItem(i);
+			if(product != null) {
+				var product = product.split(',');
+				console.log(product[0] + " : " + product[1]);
+				// console.log(product);
+				createProductCard(product[0], product[1]);
+			}
+		}
+	}
 }
 window.addEventListener("load", init);
 
@@ -276,7 +293,7 @@ function changeOpacity(input, button) {
 * correspondant à l'objet indiqué via l'index
 * @param index = identifiant de l'élement à ajouter au panier
 */
-var createProductCard = function(index) {
+var createProductCard = function(index, quantite) {
 
 	// récupère la liste des élements dans le panier (achats)
 	var achats = document.querySelector(".achats");
@@ -301,7 +318,9 @@ var createProductCard = function(index) {
 	achat.appendChild(createBlock("h4", product.querySelector(".description").innerHTML));
 
 	// création de la quantité
-	var quantite = product.querySelector("input").value;
+	if(quantite == undefined) {
+		var quantite = product.querySelector("input").value;
+	}
 	if(quantite > MAX_QTY) {
 		quantite = MAX_QTY;
 	}
@@ -347,8 +366,6 @@ var addProductCard = function(index, input) {
 	var achat = document.getElementById(index + "-achat");
 	var addQte = Number(input.value);
 	var initQte = achat.querySelector("input").value;
-	console.log(initQte);
-
 	var sum = addQte + Number(initQte);
 	if (sum > MAX_QTY) {
 		sum = MAX_QTY;
@@ -372,4 +389,55 @@ var updateTotal = function() {
 	}
 	// la valeur de #montant devient alors le total
 	document.querySelector('#montant').innerHTML = total;
+}
+
+
+/*
+* génère un bouton pour sauvegarder le panier via localStorage
+*/
+var createLocalStorageSaveButton = function() {
+	// création du bouton à l'intérieur d'un span
+	// ainsi que son ajout à la fin du body
+	var span = document.createElement("span");
+	var button = document.createElement("button");
+	button.appendChild(document.createTextNode('sauvegarder le panier'));
+	span.appendChild(button);
+	document.body.appendChild(document.createElement("br"));
+	document.body.appendChild(document.createElement("br"));
+	document.body.appendChild(span);
+
+	// création de l'evenement du click sur le bouton
+	button.addEventListener("click", function() {
+		// supprime la totalité du localStorage avant d'effectuer la sauvegarde
+		localStorage.clear();
+		var achats = document.querySelectorAll(".achat");
+		var i = 0;
+		// pour chaque éléments dans le panier
+		for(achat of achats) {
+			
+			var index = achat.id.slice(0, -6);
+			var qte = achat.querySelector("input").value
+			var element = [index, qte];
+			console.log(index);
+			localStorage.setItem(i, element);
+			i++;
+		}
+	})
+
+}
+
+var createLocalStorageDeleteButton = function() {
+	var span = document.createElement("span");
+	var button = document.createElement("button");
+	button.appendChild(document.createTextNode('supprimer le panier'));
+	button.addEventListener("click", function() {
+		var achats = document.querySelectorAll(".achat");
+		for(achat of achats) {
+			achat.parentNode.removeChild(achat);
+		}
+		localStorage.clear();
+		updateTotal();
+	})
+	span.appendChild(button);
+	document.body.appendChild(span);
 }
