@@ -122,25 +122,7 @@ var createOrderControlBlock = function (index) {
 	// via une mise à jour automatique de la valeur
 	// à chaque changement manuel (keyup) de cette même valeur
 	input.addEventListener("keyup", function() {
-		// si la valeur est nul ou inférieur au minimum (nombre négatif) :
-		// elle est mis à 0
-		if(input.value.length == 0 | input.value < input.min) {
-			input.value = 0;
-		}
-		// si la valeur est supérieur au maximum :
-		// elle devient égal à ce même maximum
-		else if(input.value > MAX_QTY) {
-			input.value = MAX_QTY;
-		}
-		// si il y a 2 nombres ou plus :
-		//garde uniquement le dernier
-		/* NOTE : cette condition n'est ici que pour gérer la situation où la valeur
-			 de l'input comporte une chaine comme "09" afin d'effacer le 0
-			 le but est d'apporter ainsi de la lisibilité à l'utilisateur
-		*/
-		else if(input.value.length >= 2) {
-			input.value = input.value.substring(input.value.length - 1);
-		}
+		restrictInput(input);
 		changeOpacity(input, button);
 	});
 
@@ -252,6 +234,27 @@ var search = function() {
 	}
 }
 
+function restrictInput(input) {
+	// si la valeur est nul ou inférieur au minimum (nombre négatif) :
+	// elle est mis à 0
+	if(input.value.length == 0 | input.value < input.min) {
+		input.value = 0;
+	}
+	// si la valeur est supérieur au maximum :
+	// elle devient égal à ce même maximum
+	else if(input.value > MAX_QTY) {
+		input.value = MAX_QTY;
+	}
+	// si il y a 2 nombres ou plus :
+	//garde uniquement le dernier
+	/* NOTE : cette condition n'est ici que pour gérer la situation où la valeur
+		 de l'input comporte une chaine comme "09" afin d'effacer le 0
+		 le but est d'apporter ainsi de la lisibilité à l'utilisateur
+	*/
+	else if(input.value.length >= 2) {
+		input.value = input.value.substring(input.value.length - 1);
+	}
+}
 /*
 * change l'opacité du bouton en fonction de la valeur de l'input
 * si la valeur est nul le bouton devient grisé
@@ -302,7 +305,25 @@ var createProductCard = function(index) {
 	if(quantite > MAX_QTY) {
 		quantite = MAX_QTY;
 	}
-	achat.appendChild(createBlock("div", quantite, "quantite"));
+	//achat.appendChild(createBlock("div", quantite, "quantite"));
+	var divInput = document.createElement("div");
+	divInput.className = "quantite";
+
+	var newInput = document.createElement("input");
+	newInput.type = "number";
+	newInput.step = "1";
+	newInput.value = quantite;
+	newInput.min = "0";
+	newInput.max = MAX_QTY.toString();
+
+	newInput.addEventListener("keyup", function() {
+		restrictInput(newInput);
+	});
+	newInput.addEventListener("change", function() {
+		updateTotal();
+	});
+	divInput.appendChild(newInput)
+	achat.appendChild(divInput);
 
 	// création du prix
 	achat.appendChild(createBlock("div", product.querySelector(".prix").innerHTML, "prix"));
@@ -325,13 +346,14 @@ var createProductCard = function(index) {
 var addProductCard = function(index, input) {
 	var achat = document.getElementById(index + "-achat");
 	var addQte = Number(input.value);
-	var initQte = Number(achat.querySelector(".quantite").innerHTML);
+	var initQte = achat.querySelector("input").value;
+	console.log(initQte);
 
-	var sum = addQte + initQte;
+	var sum = addQte + Number(initQte);
 	if (sum > MAX_QTY) {
 		sum = MAX_QTY;
 	}
-	achat.querySelector(".quantite").innerHTML = sum;
+	achat.querySelector("input").value = sum;
 	updateTotal();
 }
 
@@ -345,7 +367,7 @@ var updateTotal = function() {
 	// pour chaque élément, ajoute son prix * quantité au total
 	for(var product of listProduct) {
 		var prix = product.querySelector(".prix").innerHTML;
-		var quantite = product.querySelector(".quantite").innerHTML;
+		var quantite = product.querySelector("input").value;
 		total += prix * quantite;
 	}
 	// la valeur de #montant devient alors le total
