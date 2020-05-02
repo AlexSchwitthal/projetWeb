@@ -16,10 +16,12 @@ var total = 0;
 // function called when page is loaded, it performs initializations
 var init = function () {
 	createShop();
+	document.getElementById("filter").addEventListener("keyup", search);
 
 	// TODO : add other initializations to achieve if you think it is required
 }
 window.addEventListener("load", init);
+
 
 
 
@@ -116,8 +118,6 @@ var createOrderControlBlock = function (index) {
 * create and return the figure block for this product
 * see the static version of the project to know what the <figure> should be
 * @param product (product object) = the product for which the figure block is created
-*
-* TODO : write the correct code
 */
 var createFigureBlock = function (product) {
 	// create two element, figure and img
@@ -128,4 +128,37 @@ var createFigureBlock = function (product) {
 	img.alt = product.name;
 
 	return figure;
+}
+
+
+/*
+* met à jour tout les éléments de la boutique,
+* en les affichants/masquant selon le filtre (filter) courant
+*/
+var search = function() {
+	/*
+	NOTE : le filtre et le produit sont tout les deux passé en minuscule
+	pour éviter tout problème de case lors du tri
+	*/
+	
+	// récupération de la valeur courante de filter et de tout les éléments de la boutique
+	var filter = document.getElementById('filter').value.toLowerCase();
+	var products = document.querySelectorAll('#boutique > .produit');
+
+	// boucle sur tout les produits de la boutique
+	for(var product of products) {
+
+		// récupération du nom du produits (via son titre "h4")
+		var nameOfProduct = product.querySelector('h4').innerHTML.toLowerCase();
+
+		//si le nom du produit contient le filtre :
+		// l'on affiche le produit via un style de type inline-block
+		// sinon on masque l'objet
+		if(nameOfProduct.includes(filter)) {
+			product.style.display = "inline-block";
+		}
+		else {
+			product.style.display = "none";
+		}
+	}
 }
