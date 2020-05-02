@@ -53,7 +53,7 @@ var createProduct = function (product, index) {
 	// build the h4 part of 'block'
 	block.appendChild(createBlock("h4", product.name));
 
-	// /!\ should add the figure of the product... does not work yet... /!\
+	// add the figure of the product
 	block.appendChild(createFigureBlock(product));
 
 	// build and add the div.description part of 'block'
@@ -99,6 +99,7 @@ var createOrderControlBlock = function (index) {
 	input.value = "0";
 	input.min = "0";
 	input.max = MAX_QTY.toString();
+
 	// add input to control as its child
 	control.appendChild(input);
 
@@ -106,8 +107,44 @@ var createOrderControlBlock = function (index) {
 	var button = document.createElement("button");
 	button.className = 'commander';
 	button.id = index + "-" + orderIdKey;
+
 	// add control to control as its child
 	control.appendChild(button);
+
+	// AJOUT D'EVENEMENT SUR INPUT
+	// gestion de la quantité maximum et minimum autorisé pour un produit
+	// via une mise à jour automatique de la valeur
+	// à chaque changement manuel (keyup) de cette même valeur
+	input.addEventListener("keyup", function() {
+		// si la valeur est nul ou inférieur au minimum (nombre négatif) :
+		// elle est mis à 0
+		if(input.value.length == 0 | input.value < input.min) {
+			input.value = 0;
+		}
+		// si la valeur est supérieur au maximum :
+		// elle devient égal à ce même maximum
+		else if(input.value > MAX_QTY) {
+			input.value = MAX_QTY;
+		}
+		// si il y a 2 nombres ou plus :
+		//garde uniquement le dernier
+		/* NOTE : cette condition n'est ici que pour gérer la situation où la valeur
+			 de l'input comporte une chaine comme "09" afin d'effacer le 0
+			 le but est d'apporter ainsi de la lisibilité à l'utilisateur
+		*/
+		else if(input.value.length >= 2) {
+			input.value = input.value.substring(input.value.length - 1);
+		}
+
+		if(input.value == 0) {
+			button.style.opacity = "0.25";
+		}
+		else {
+			button.style.opacity = "0.8";
+		}
+	});
+
+	button.addEventListener("click", addProductToCard);
 
 	// the built control div node is returned
 	return control;
@@ -140,7 +177,7 @@ var search = function() {
 	NOTE : le filtre et le produit sont tout les deux passé en minuscule
 	pour éviter tout problème de case lors du tri
 	*/
-	
+
 	// récupération de la valeur courante de filter et de tout les éléments de la boutique
 	var filter = document.getElementById('filter').value.toLowerCase();
 	var products = document.querySelectorAll('#boutique > .produit');
@@ -161,4 +198,12 @@ var search = function() {
 			product.style.display = "none";
 		}
 	}
+}
+
+var checkInput = function() {
+
+}
+
+var addProductToCard = function() {
+	console.log("lol");
 }
