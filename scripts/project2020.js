@@ -236,9 +236,9 @@ var search = function() {
 
 function restrictInput(input) {
 	// si la valeur est nul ou inférieur au minimum (nombre négatif) :
-	// elle est mis à 0
+	// elle est mis à la valeur minimale de l'input
 	if(input.value.length == 0 | input.value < input.min) {
-		input.value = 0;
+		input.value = input.min;
 	}
 	// si la valeur est supérieur au maximum :
 	// elle devient égal à ce même maximum
@@ -313,7 +313,7 @@ var createProductCard = function(index) {
 	newInput.type = "number";
 	newInput.step = "1";
 	newInput.value = quantite;
-	newInput.min = "0";
+	newInput.min = "1";
 	newInput.max = MAX_QTY.toString();
 
 	newInput.addEventListener("keyup", function() {
