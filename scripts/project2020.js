@@ -11,27 +11,29 @@ const inputIdKey = "qte";
 // the total cost of selected products
 var total = 0;
 
-
-
 // function called when page is loaded, it performs initializations
 var init = function () {
 	createShop();
 	//ajout de l'event de recherche sur le filtre
 	document.getElementById("filter").addEventListener("keyup", search);
 
+	// ajout des bouttons de sauvegarde et de suppression du panier dans le localStorage
 	createLocalStorageSaveButton();
 	createLocalStorageDeleteButton();
 
+	// si au chargement du site, le localStorage n'est pas vide alors
 	if(localStorage.length != 0) {
-		var achats = document.querySelector(".achats");
+		// l'on parcours la liste des éléments stockés
 		for(var i = 0; i < localStorage.length; i++) {
-
+			// l'on récupère l'élément et l'on s'assure qu'il n'est pas null
 			var product = localStorage.getItem(i);
 			if(product != null) {
+				// puis, si son catalogue est bien celui du catalogue courant
+				// le produit est ajouté au panier
 				var product = product.split(',');
-				console.log(product[0] + " : " + product[1]);
-				// console.log(product);
-				createProductCard(product[0], product[1]);
+				if(product[2] == getCurrentCatalog()) {
+					createProductCard(product[0], product[1]);
+				}
 			}
 		}
 	}
@@ -212,8 +214,9 @@ var createTrashBlock = function (divClass, buttonClass, index) {
 	button.addEventListener("click", function() {
 		// récupère l'element du panier correspondant à l'index
 		var element = document.getElementById(index + "-achat");
-		// le supprime et met à jour la valeur du panier
+		// le supprime et met à jour la valeur du panier et le localStorage
 		element.parentNode.removeChild(element);
+		removeLocalStorageElement(index);
 		updateTotal();
 	})
 	return div;
@@ -324,7 +327,6 @@ var createProductCard = function(index, quantite) {
 	if(quantite > MAX_QTY) {
 		quantite = MAX_QTY;
 	}
-	//achat.appendChild(createBlock("div", quantite, "quantite"));
 	var divInput = document.createElement("div");
 	divInput.className = "quantite";
 
@@ -393,6 +395,18 @@ var updateTotal = function() {
 
 
 /*
+* récupère le nom du catalogue utilisé actuellement
+* le but est ainsi de sauvegardé et charger différent localStorage
+* et d'utiliser le bon en fonction du catalogue demandé
+*/
+var getCurrentCatalog = function() {
+	var allScripts = document.getElementsByTagName("script");
+	var currentCatalogUrl = allScripts[0].src.split('/');
+	return currentCatalogUrl.slice(-1)[0];
+}
+
+
+/*
 * génère un bouton pour sauvegarder le panier via localStorage
 */
 var createLocalStorageSaveButton = function() {
@@ -409,35 +423,93 @@ var createLocalStorageSaveButton = function() {
 	// création de l'evenement du click sur le bouton
 	button.addEventListener("click", function() {
 		// supprime la totalité du localStorage avant d'effectuer la sauvegarde
-		localStorage.clear();
+		partialClear();
 		var achats = document.querySelectorAll(".achat");
 		var i = 0;
 		// pour chaque éléments dans le panier
 		for(achat of achats) {
-			
-			var index = achat.id.slice(0, -6);
+			// si un élément est déjà stocké sur l'emplacement i
+			// on passe à l'emplacement suivant
+			while(localStorage.getItem(i) != null) {
+				i++;
+			}
+			// l'on récupère l'id de l'élément
+			var id = achat.id.slice(0, -6);
+			// sa quantité
 			var qte = achat.querySelector("input").value
-			var element = [index, qte];
-			console.log(index);
+			// puis on la stock dans un tableau, avec son catalogue correspondant
+			var element = [id, qte, getCurrentCatalog()];
+			// enfin, l'on stocke le tableau à l'emplacement i dans localStorage
 			localStorage.setItem(i, element);
 			i++;
 		}
 	})
-
 }
 
+/*
+* génère un bouton pour supprimer le panier via localStorage
+*/
 var createLocalStorageDeleteButton = function() {
+	// création du bouton à l'intérieur d'un span
+	// ainsi que son ajout à la fin du body
 	var span = document.createElement("span");
 	var button = document.createElement("button");
 	button.appendChild(document.createTextNode('supprimer le panier'));
+	span.appendChild(button);
+	document.body.appendChild(span);
+
+	// création de l'evenement du click sur le bouton
 	button.addEventListener("click", function() {
+		// l'on récupère tout les achats du panier
 		var achats = document.querySelectorAll(".achat");
+		// on boucle dessus, et on les supprimes
 		for(achat of achats) {
 			achat.parentNode.removeChild(achat);
 		}
-		localStorage.clear();
+		// enfin, on mets à jour le localStorage et le prix total du panier
+		partialClear();
 		updateTotal();
 	})
-	span.appendChild(button);
-	document.body.appendChild(span);
+
+}
+
+/*
+*	supprime partiellement les éléments de localStorage :
+* supprime uniquement les éléments du catalogue courant
+*/
+function partialClear() {
+	// parcours la liste des éléments
+	for(key in localStorage) {
+		// le recupère et vérifie qu'il s'agit bien d'une string (notre format de sauvegarde)
+		var product = localStorage[key];
+		if(typeof product == "string") {
+			// si la string contient le nom du catalogue courant, l'élément est supprimé
+			var product = product.split(',');
+			if(product[2] == getCurrentCatalog()) {
+			 	delete localStorage[key];
+			}
+		}
+	}
+}
+
+/*
+*	supprime un élément unique du localStorage :
+* @param index = identifiant de l'élement du catalogue qui sera supprimé
+*/
+function removeLocalStorageElement(index) {
+	// l'on boucle sur localStorage
+	for(key in localStorage) {
+		// dès que l'on récupère un élément stocké
+		var product = localStorage[key];
+		if(typeof product == "string") {
+			// l'on vérifie si il est bien dans le catalogue couraant et à l'index donné
+			var product = product.split(',');
+			if(product[2] == getCurrentCatalog()) {
+				if(product[0] == index) {
+					// si oui, alors l'élément est supprimé
+					delete localStorage[key];
+				}
+			}
+		}
+	}
 }
