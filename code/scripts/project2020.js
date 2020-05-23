@@ -1,4 +1,4 @@
-// AMROUCHE KARIM MOUMEN
+// AMROUCHE KARIM MOUMENE
 // SCHWITTHAL ALEXANDRE
 
 // === constants ===
@@ -259,19 +259,22 @@ function restrictInput(input) {
   if (input.value.length == 0 | input.value < input.min) {
     input.value = input.min;
   }
-  // si la valeur est supérieur au maximum :
-  // elle devient égal à ce même maximum
-  else if (input.value > MAX_QTY) {
-    input.value = MAX_QTY;
-  }
-  // si il y a 2 nombres ou plus :
-  //garde uniquement le dernier
+
+  // si il y a plus de chiffres que le nombre du chiffre du maximum :
+  //garde uniquement les derniers
   /* NOTE : cette condition n'est ici que pour gérer la situation où la valeur
   	 de l'input comporte une chaine comme "09" afin d'effacer le 0
   	 le but est d'apporter ainsi de la lisibilité à l'utilisateur
+     ainsi que de facilité le changement de valeur, en effaçant les valeurs précédentes
   */
-  else if (input.value.length >= 2) {
-    input.value = input.value.substring(input.value.length - 1);
+  else if (input.value.length > MAX_QTY.toString().length) {
+    input.value = input.value.substring(input.value.length - MAX_QTY.toString().length);
+  }
+
+  // si la valeur est supérieur au maximum :
+  // elle devient égal à ce même maximum
+  if (input.value > MAX_QTY) {
+    input.value = MAX_QTY;
   }
 }
 
@@ -338,12 +341,14 @@ var createProductCard = function(index, quantite) {
   newInput.min = "1";
   newInput.max = MAX_QTY.toString();
 
-  newInput.addEventListener("keyup", function() {
-    restrictInput(newInput);
-  });
   newInput.addEventListener("change", function() {
     updateTotal();
   });
+  newInput.addEventListener("keyup", function() {
+    restrictInput(newInput);
+    updateTotal();
+  });
+
   divInput.appendChild(newInput)
   achat.appendChild(divInput);
 

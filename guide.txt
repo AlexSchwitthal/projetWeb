@@ -1,0 +1,109 @@
+SCHWITTHAL Alexandre
+AMROUCHE Karim Moumene
+
+Le sujet que nous avons choisi de traiter est le sujet n°1 : la boutique en ligne
+
+Les questions 1 à 9 ont été traité ;
+
+le catalog1.js est utilisé dans index.html
+le catalog2.js est utilisé dans index2.html
+
+Ci-dessous seront détaillés le fonctionnement et raisonnement utilisé pour chaque questions
+ainsi que les possibles prises de libertés par rapport à l'énoncé :
+
+1)
+aucune modification
+
+2)
+aucune modification
+
+3)
+Remaniement de createFigureBlock en changeant la signature de la fonction pour
+faire passer en paramètre l'image et le nom du produit courant
+retourne un élement figure contenant une image,
+qui à pour src l'image passé en paramètre et pour alt le nom passé en paramètre
+
+4)
+Ajout d'un evenement keyup sur filter, l'evenement est détaillé dans
+la fonction "search" qui a été crée
+
+5)
+Ajout de 2 évenement sur la fonction createOrderControlBlock :
+- un sur l'evenement change pour gérér l'opacité du bouton (voir fonction changeOpacity)
+- un sur keyup pour gérer l'opacité et changer la valeur présente (voir fonction restrictInput).
+
+Modification effectuées par rapport à l'énoncé :
+si il y a plus de chiffres que le nombre de chiffres utilisé dans le maximum (ici 1 vu que le maximum est 9),
+l'on garde uniquement les derniers chiffres (égal au nombre de chiffres dans le maximum)
+afin de pouvoir plus facilement changer de valeur
+en cas de dépassement de la valeur, la valeur qui sera utilisée est le maximum (9 ici)
+En utilisant ce fonctionnement, si par exemple l'on souhaite monter le maximum à 99,
+cela est tout à fait possible et ne créer pas d'erreur, ce qui ajoute de la maintenabilité au code
+
+6)
+Ajout d'un autre evenement sur la fonction createOrderControlBlock :
+Cette fois si sur son button sur l'évenement "click", qui peut soit :
+- créer un element dans le panier (fonction createProductCard)
+    la structure de l'élément créer est similaire à celle présente dans le code html static
+
+- ajouter la valeur saisie si l'élement existe déjà dans le panier (fonction addProductCard)
+    si la valeur déjà présente et la valeur à ajouter dépasse la limite (9 ici)
+    alors la valeur finale sera 9
+
+ces deux fonctions font elle même appel à une autre function : updateTotal()
+qui modifie la valeur totale du panier selon les éléments présent à l'intérieur du panier
+
+7)
+Lors de l'ajout d'un nouvel élément au panier (via la fonction createProductCard)
+une fonction nommée createTrashBlock est appelé et créer un élément "poubelle" sur ce même produit
+cette poubelle dispose d'un bouton sur lequel un evenement "click" est ajouté
+qui supprime tout l'élément (le produit, ainsi que sa poubelle)
+et qui met à jour le total via updateTotal
+
+8)
+Lors de l'ajout d'un nouvel élément au panier (via la fonction createProductCard)
+une variable "newInput" est créer et fonctionne de la même façon
+que la sélection de la quantité depuis la boutique (voir question 5).
+La seule différence est qu'ici, la quantité minimale est de 1,
+puisque cela n'aurait pas de sens d'avoir un élément avec une quantité de 0 dans le panier
+
+
+9)
+Ajout d'un fonction nommée createLocalStorageSaveButton
+qui sera appelée à l'initialisation et ajoute à la fin du document html
+un bouton pour sauvegarder le panier, ce bouton dispose d'un évenement click :
+au click, l'on recupère la liste des éléments dans le panier
+et l'on enregistre chacun d'eux dans le localStorage
+l'enregistrement ce fait de la façon suivante :
+on initialise tout d'abord un entier i à 0
+on vérifie qu'aucun élément n'est enregistré dans le localStorage avec pour clé i
+si c'est le cas, on incrémente i tant que ce n'est plus le cas, puis l'on créer l'élément
+de la façon suivante :
+- une clé, qui sera un entier incrémenté à chaque itération (i)
+- un tableau donnant les informations suivantes sur l'élément enregistré :
+  - l'id de l'élément, afin de retrouver quel élément de la boutique c'était
+  - sa quantité, la quantité présente au moment du click sur le bouton de sauvegarde
+  - le catalogue auquel il appartient (voir ajout bonus ci-dessous)
+
+par exemple , pour "un joli petit ane gris" présent 3 fois, son enregistrement pourra être le suivant :
+(1, [2, 3, catalog1.js])
+
+De plus, lors de l'initialisation, si le localStorage n'est pas null,
+alors on boucle dessus et l'on récupère chacun des éléments
+et l'on créer les éléments dans le panier (via createProductCard)
+
+Ajout bonus :
+- l'enregistrement de catalogue utilisé est là pour une raison bien précise :
+  permettre l'enregistrement de 2 paniers, sur les 2 catalogues en même temps sans créer de bug
+  l'on peut ainsi avoir index.html (catalog1) et index2.html (catalog2) d'ouvert en même temps
+  sans causer de bug. ainsi à l'ajout des éléments dans le panier à l'initialisation, une vérification
+  est effectué sur le catalogue courant et celui enregistré (voir fonction getCurrentCatalog)
+  dans l'objet du localStorage pour les comparer :
+  si les deux valeurs sont égales, l'élement est ajouté, sinon, il est ignoré
+
+- un bouton de suppression du localStorage est également disponible,
+  créer à l'initialisation comme le bouton de sauvegarde,
+  celui-ci supprime la totalité du panier courant et sa sauvegarde dans le localStorage
+  néanmoins, l'on ne supprime pas l'intégralité du localStorage (car il y a une gestion des deux catalogues)
+  la suppression passe alors par la fonction partialClear() qui retire tout les élements du localStorage
+  présent dans le catalogue courant. L'autre catalogue ne sera alors pas affecté

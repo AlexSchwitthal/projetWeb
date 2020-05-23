@@ -1,21 +1,21 @@
 // YOUR NAME HERE
 
 // === constants ===
-const MAX_QTY = 9;
+const MAX_QTY = 5;
 const productIdKey = "product";
 const orderIdKey = "order";
 const inputIdKey = "qte";
 
 // === global variables  ===
-// the total cost of selected products 
+// the total cost of selected products
 var total = 0;
 
 
 
-// function called when page is loaded, it performs initializations 
+// function called when page is loaded, it performs initializations
 var init = function () {
 	createShop();
-	
+
 	// TODO : add other initializations to achieve if you think it is required
 }
 window.addEventListener("load", init);
@@ -49,11 +49,11 @@ var createProduct = function (product, index) {
 	block.id = index + "-" + productIdKey;
 	// build the h4 part of 'block'
 	block.appendChild(createBlock("h4", product.name));
-	
-	// /!\ should add the figure of the product... does not work yet... /!\ 
+
+	// /!\ should add the figure of the product... does not work yet... /!\
 	block.appendChild(createFigureBlock(product));
 
-	// build and add the div.description part of 'block' 
+	// build and add the div.description part of 'block'
 	block.appendChild(createBlock("div", product.description, "description"));
 	// build and add the div.price part of 'block'
 	block.appendChild(createBlock("div", product.price, "prix"));
@@ -81,8 +81,8 @@ var createBlock = function (tag, content, cssClass) {
 * builds the control element (div.controle) for a product
 * @param index = the index of the considered product
 *
-* TODO : add the event handling, 
-*   /!\  in this version button and input do nothing  /!\  
+* TODO : add the event handling,
+*   /!\  in this version button and input do nothing  /!\
 */
 var createOrderControlBlock = function (index) {
 	var control = document.createElement("div");
@@ -98,14 +98,14 @@ var createOrderControlBlock = function (index) {
 	input.max = MAX_QTY.toString();
 	// add input to control as its child
 	control.appendChild(input);
-	
+
 	// create order button
 	var button = document.createElement("button");
 	button.className = 'commander';
 	button.id = index + "-" + orderIdKey;
 	// add control to control as its child
 	control.appendChild(button);
-	
+
 	// the built control div node is returned
 	return control;
 }
@@ -120,6 +120,6 @@ var createOrderControlBlock = function (index) {
 */
 var createFigureBlock = function (product) {
 	// this is absolutely not the correct answer !
-	// TODO 
+	// TODO
 	return createBlock("figure", "");
 }
